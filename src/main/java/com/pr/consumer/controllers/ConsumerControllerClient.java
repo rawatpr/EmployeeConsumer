@@ -14,19 +14,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 @Controller
 public class ConsumerControllerClient {
-	
 	@Autowired
-	private DiscoveryClient discoveryClient;
+	private LoadBalancerClient loadBalancer;
 	
 	public void getEmployee() throws RestClientException, IOException {
 		
-		List<ServiceInstance> instances=discoveryClient.getInstances("employee-producer");
-		ServiceInstance serviceInstance=instances.get(0);
+		ServiceInstance serviceInstance=loadBalancer.choose("employee-producer");
+		
+		System.out.println(serviceInstance.getUri());
 		
 		String baseUrl=serviceInstance.getUri().toString();
-		
 		baseUrl=baseUrl+"/employee";
 		
 		RestTemplate restTemplate = new RestTemplate();
